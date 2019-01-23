@@ -31,7 +31,7 @@ import SuggestedScreen from './src/Components/SuggestedScreen.js'
 import Settings from './src/Components/Settings.js'
 import EditProfile from './src/Components/EditProfile.js'
 import PasswordChange from './src/Components/PasswordChange.js'
-import Followers from './src/Components/Followers.js'
+import Followers from './src/Components/Followers.js';
 import Following from './src/Components/Following.js'
 import Landing from './src/Components/Landing.js'
 import Login from './src/Components/Login.js'
