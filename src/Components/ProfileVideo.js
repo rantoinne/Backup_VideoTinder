@@ -3,20 +3,15 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,TouchableOpacity,Image, Dimensions,ScrollView,TouchableHighlight
+  View,TouchableOpacity,Image, Dimensions,ScrollView,TouchableHighlight, FlatList
 } from 'react-native';
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
-import GridView from 'react-native-super-grid';
+import FlatGrid from 'react-native-super-grid';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right, Tab, Tabs } from 'native-base';
 import VideoPlayer from 'react-native-video-player';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+
 var width = Dimensions.get('window').width;
 
 const theme = {
@@ -39,15 +34,26 @@ export default class ProfileVideo extends Component {
     header: false,
   }
 
+  checkUser(item) {
+    if(this.props.notMe) {
+      this.props.navigation.navigate('NotMyVideoView', { items: item, archived: this.props.archived }) 
+    }
+
+    else {
+      this.props.navigation.navigate('FullScreenVid', { items: item, archived: this.props.archived }) 
+    }
+  }
+
   render() {
     return (
-      <ScrollView automaticallyAdjustContentInsets={false} style={styles.scrollView}>
-        <GridView
+      <View style= {{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ScrollView automaticallyAdjustContentInsets={true} contentContainerStyle={styles.scrollView}>
+        <FlatGrid
           items={this.props.selfVideos}
           style={styles.gridView}
-          spacing= {5}
+          spacing= {0}
           renderItem={item => (
-            <TouchableOpacity onPress = { () => this.props.navigation.navigate('FullScreenVid', {items: item, archived: this.props.archived}) }>
+            <TouchableOpacity onPress = { () => this.checkUser(item)}>
                 <View style={{flex: 1}}>
                   <Image
                     style={{width: width/3, height: width/3}}
@@ -59,13 +65,15 @@ export default class ProfileVideo extends Component {
         )}
         />
       </ScrollView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
   scrollView:{
-
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   innerContainer: {
       flexDirection: 'row',
@@ -83,6 +91,7 @@ const styles = StyleSheet.create({
     },
     gridView: {
     flex: 1,
+    marginTop: 10,
   },
   itemContainer: {
     justifyContent: 'flex-end',

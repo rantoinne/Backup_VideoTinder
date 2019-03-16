@@ -8,14 +8,9 @@ import {
   ScrollView
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
+
 import {saveUserData} from '../redux/reducers/tasks';
 import { connect } from 'react-redux';
 import _ from 'lodash';
@@ -54,6 +49,7 @@ class VideoCapture extends Component {
       minutes: "3",
       seconds: "00",
       cachedVideoURI: "",
+      progress: 0
     };
     this.top = ''
     this.left = ''
@@ -61,6 +57,7 @@ class VideoCapture extends Component {
     // method that triggers the countdown functionality
     this.startCountDown = this.startCountDown.bind(this);
     this.tick = this.tick.bind(this);
+    this.volume = 1.0;
   }
 
   formatTime(timestamp) {
@@ -83,7 +80,7 @@ class VideoCapture extends Component {
                 return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }
 
@@ -236,19 +233,20 @@ this.secondsRemaining--
            captureQuality={'480p'}
            keepAwake={true}
           >
-          <Text style={styles.assetsTime}>{this.state.minutes + ":" + this.state.seconds}</Text>
           <View style={styles.cameraAssets}>
-            <View style={styles.assetsFlip}>
-              <TouchableOpacity onPress={this.changeCameraType.bind(this)}>
-                <IonIcon name="ios-reverse-camera-outline" size={35} color="#fefefe"/>
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.assetsTime}>{this.state.minutes + ":" + this.state.seconds}</Text>
 
             <View style={styles.assetsCamera}>
               <TouchableOpacity onPress={this.state.startVid ? this.takeVid.bind(this) : this.stopVid.bind(this)}>
-                  <View style={{justifyContent: 'center',alignItems: 'center',height: 60, width:60,backgroundColor: '#f00039',borderRadius: 30}}>
+              <View style={{justifyContent: 'center',alignItems: 'center',height: 60, width:60,backgroundColor: '#f00039',borderRadius: 30}}>
                     <MaterialIcons name={this.state.startVid ? 'videocam' : 'stop'} size={40} color="#fff" />
-                  </View>
+              </View>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.assetsFlip}>
+              <TouchableOpacity onPress={this.changeCameraType.bind(this)}>
+                <IonIcon name="ios-reverse-camera-outline" size={35} color="#fefefe"/>
               </TouchableOpacity>
             </View>
           </View>
@@ -256,9 +254,16 @@ this.secondsRemaining--
     );
   }
 
+  async transferPayload() {
+    this.volume = 0.0;
+    this.props.navigation.navigate('Scenes', { VideoPath: VideoPath, picturePath: this.state.picturePath,
+      user: this.props.user, description: this.state.description });
+  }
+
   async storeVideo() {
     this.setState({
-      data : false
+      data : false,
+      progress: 10
     })
          let formData = new FormData();
           formData.append("video", {
@@ -266,9 +271,10 @@ this.secondsRemaining--
             uri: VideoPath,
             type: 'video/mp4'
         });
+          this.setState({progress: 30})
         ImageResizer.createResizedImage(this.state.picturePath, 1000, 1000, 'JPEG', 50, rotation=0, null)
         .then((resizedImageUri) => {
-          console.log("1234567890",resizedImageUri);
+          // console.log("1234567890",resizedImageUri);
           formData.append("thumbnail", {
           uri: resizedImageUri.uri,
           type: 'image/jpeg',
@@ -282,6 +288,7 @@ this.secondsRemaining--
           formData.append("userId", this.props.user._id);
           formData.append("description", this.state.description)
           var taggedIds = [];
+          this.setState({progress: 50})
         if(this.state.tagList.length > 0){
 
           for(var j = 0; j < this.state.tagList.length; j++){
@@ -290,18 +297,20 @@ this.secondsRemaining--
           formData.append("tags", JSON.stringify(taggedIds))
         }
         try {
-          console.log("thumbups", formData);
+          // console.log("thumbups", formData);
+          this.setState({progress: 75})
             let response = fetch("http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/upload", {
                 method: 'post',
                 body: formData
             }).then(response => {
-               this.props.navigation.navigate('profile', {});
+               this.props.navigation.navigate('profile');
                var userObj = this.props.user;
                var newUser = {...userObj, postsCount: userObj.postsCount + 1}
                this.props.saveUserData(newUser)
                 if (response.ok) {
                   this.setState({
-                    data : true
+                    data : true,
+                    progress: 100
                   })
                   return response.json().then(response => ({ response }));
                 }
@@ -309,7 +318,7 @@ this.secondsRemaining--
               })
         }
         catch (error) {
-            console.log('error : ' + error);
+            // console.log('error : ' + error);
             return error;
       }
     });
@@ -319,11 +328,12 @@ this.secondsRemaining--
     return (
       <View style={{flex:1,flexDirection:'column'}}>
         <View style={{flex:1}}>
-        <TouchableWithoutFeedback onPress={(evt) => this.handlePress(evt) } disabled={this.state.isSearchText}>
+        <TouchableWithoutFeedback disabled={this.state.isSearchText}>
           <Video source={{ uri: this.state.path }}
              style={styles.preview}
+             ref={(ref: Video) => { this.video = ref }}
              rate={1.0}
-             volume={1.0}
+             volume={this.volume}
              muted={false}
              resizeMode={"cover"}
              onEnd={() => { console.log('Done!') }}
@@ -338,7 +348,7 @@ this.secondsRemaining--
               color="#ff0046"
           />
           :
-          <IonIcon onPress={()=>this.storeVideo()} name="md-send" style={styles.cancel} size={24} color="#f00039"/>
+          <MaterialIcons onPress={()=>this.transferPayload()} name="send" style={styles.cancel} size={30} color="#f00039"/>
         }
         <View style={styles.MainContainer}>
           <TextInput
@@ -466,11 +476,8 @@ const styles = StyleSheet.create({
   cancel: {
     position: 'absolute',
     right: 20,
-    top: 20,
+    top: 16,
     backgroundColor: 'transparent',
-    color: '#f00039',
-    fontSize: 22,
-    fontFamily: 'Montserrat-Regular',
   },
   stopText: {
     color: '#fefefe',
@@ -515,28 +522,26 @@ const styles = StyleSheet.create({
     height:15
   },
   cameraAssets: {
-    flex: 1,
-    flexDirection: 'column'
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    paddingVertical: 10
   },
   assetsTime:{
-    flex:1,
     color: '#fff',
-    position: 'absolute',
-    bottom: 52,
-    left: 30,
-    fontSize: 14
+    fontSize: 14,
+    marginBottom: 4
   },
   assetsFlip: {
-    flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    alignSelf: 'flex-end',
-    marginBottom:30,
-    marginRight:30
+    marginHorizontal:10,
+    marginBottom:15
   },
   assetsCamera:{
     alignSelf: 'center',
-    marginBottom: 30
+    paddingBottom: 30
   },
   imageContainer:{
     height: screenHeight/2,

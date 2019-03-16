@@ -8,16 +8,11 @@ import {
   View,TouchableOpacity,Image, Dimensions,ScrollView,TouchableHighlight,AsyncStorage,ActivityIndicator
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import ProfileVideo from './ProfileVideo.js'
 import LinearGradient from 'react-native-linear-gradient';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right, Tab, Tabs } from 'native-base';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
 class profile extends Component {
 
@@ -66,7 +61,7 @@ class profile extends Component {
                 return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
 
     try {
@@ -86,16 +81,16 @@ class profile extends Component {
           return response.json().then(error => ({ error }));
           })
 } catch(error) {
-    console.log("error " + error);
+    // console.log("error " + error);
 }
   }
 
-  Capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  Capitalize(name) {
+  return name
   }
 
   render() {
-    console.log("profileprofile", this.props.user);
+    // console.log("profileprofile", this.props.user);
     const {goBack} = this.props.navigation;
      var {navigate} = this.props.navigation;
     return (
@@ -107,15 +102,19 @@ class profile extends Component {
             </TouchableOpacity>
             <View style={{flexDirection: 'row'}}>
               <TouchableHighlight underlayColor = 'rgba(255,255,255, 0.5)' onPress = { () => navigate ("InviteScreen", {username : this.props.user.username}) }>
-                <Image
-                  style={{width: 24, height: 24, marginRight: 20}}
-                  source={require('./addUser.png')}
+                <SimpleLineIcons
+                  size= {24}
+                  style= {{alignSelf: 'center', marginRight: 20}}
+                  name= 'user-follow'
+                  color= 'white'
                 />
               </TouchableHighlight>
               <TouchableOpacity underlayColor = '#DFE1E3' onPress = { () => navigate ("Settings", {}) }>
-                <Image
-                  style={{width: 24, height: 24}}
-                  source={require('./setting1.png')}
+                <SimpleLineIcons
+                  size= {24}
+                  style= {{alignSelf: 'center'}}
+                  name= 'settings'
+                  color= 'white'
                 />
               </TouchableOpacity>
             </View>
@@ -171,7 +170,7 @@ class profile extends Component {
                     backgroundColor: '#DF332E'
                 }}
               >
-                <ProfileVideo selfVideos={this.state.selfVideos} navigation={this.props.navigation} archived = {false}/>
+                <ProfileVideo selfVideos={this.state.selfVideos} navigation={this.props.navigation} archived = {false} notMe= {false} />
               </Tab>
 
               <Tab heading="Archive"

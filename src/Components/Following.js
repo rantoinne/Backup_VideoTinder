@@ -15,13 +15,6 @@ import { Col, Row, Grid } from 'react-native-easy-grid';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
 import FollowingCards from './FollowingCards.js'
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
 class Following extends Component{
 
   static navigationOptions = {
@@ -70,7 +63,7 @@ class Following extends Component{
                 return response.json().then(error => ({ error }));
               }
               catch(error) {
-                  console.log("error " + error);
+                  // console.log("error " + error);
               }
 
     AsyncStorage.multiGet(['user']).then((data) => {
@@ -86,7 +79,7 @@ class Following extends Component{
         return null
       }
     }).catch(err => {
-      console.log("in error", err)
+      // console.log("in error", err)
     })
   }
 
@@ -109,7 +102,7 @@ class Following extends Component{
                   this.props.saveUserData(newUser)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
@@ -132,7 +125,7 @@ class Following extends Component{
                   this.props.saveUserData(newUser)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 

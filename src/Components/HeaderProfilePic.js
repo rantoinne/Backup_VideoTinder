@@ -9,12 +9,7 @@ import { connect } from 'react-redux';
 import {saveUserData} from '../redux/reducers/tasks';
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import Entypo from 'react-native-vector-icons/Entypo';
 
 class HeaderProfilePic extends Component{
     
@@ -23,10 +18,20 @@ class HeaderProfilePic extends Component{
     };
 
   render() {   
-    console.log("pop", this.props.user);   
-    return (       
-          <Thumbnail source={{uri: this.props.user.imageUrl ? this.props.user.imageUrl : "https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg" }} style={{width: 40, height: 40,marginRight: 18, borderWidth:1, marginTop: 4}} />
-    );  
+    // console.log("pop", this.props.user);   
+    if(this.props.user.imageUrl) {
+      return (       
+            <Thumbnail source={{uri: this.props.user.imageUrl}} style={{width: 40, height: 40,marginRight: 18, borderWidth:1, marginTop: 4}} />
+      );  
+    }
+
+    else {
+      return (
+        <View style= {{ width: 44, height: 44, borderRadius: 23, backgroundColor: 'white', marginRight: 18, justifyContent: 'center', alignItems: 'center', padding: 4, elevation: 2}}>
+        <Entypo name= 'user' size = {32} color= 'gray' style= {{alignSelf: 'center'}} />
+        </View>
+      );
+    }
   }
 }
 

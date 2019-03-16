@@ -33,8 +33,6 @@ local.properties
 # node.js
 #
 node_modules/
-android/
-assets/
 npm-debug.log
 yarn-error.log
 

@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   Image,
-  View,TouchableOpacity,ImageBackground,TouchableHighlight,ListView,ScrollView,AsyncStorage,Alert,ActivityIndicator
+  View,TouchableOpacity, TextInput, ImageBackground,TouchableHighlight,ListView,ScrollView,AsyncStorage,Alert,ActivityIndicator
 } from 'react-native';
 
 import { TabNavigator, StackNavigator } from 'react-navigation';
@@ -12,6 +12,7 @@ import ImageResizer from 'react-native-image-resizer';
 import PhotoUpload from 'react-native-photo-upload';
 import { TextField } from 'react-native-material-textfield';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { Dropdown } from 'react-native-material-dropdown';
 import LinearGradient from 'react-native-linear-gradient';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right,Item,Input } from 'native-base';
@@ -85,6 +86,21 @@ export default class SignUp extends Component {
     }
 
 async onSignupPressed(){
+
+
+  var regExp = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+     if( regExp.test(this.state.email) == false || this.state.email === null ) {
+        Alert.alert(
+          '',
+          'Enter valid email',
+          [            
+            {text: 'OK', onPress: () => console.log('OK Pressed')},
+          ],
+          {cancelable: false},
+        );
+     }
+     else {
+
   this.setState({loader: true})
   let formData = new FormData();
           formData.append("username", this.state.username);
@@ -92,10 +108,10 @@ async onSignupPressed(){
           formData.append("email", this.state.email);
           //formData.append('image', {uri: fileURL, name: 'image.jpg', type: 'image/jpg'})
           if(this.state.imageUrl) {
-            console.log("yes")
+            // console.log("yes")
             ImageResizer.createResizedImage("file://"+this.state.imageUrl, 1000, 1000, 'JPEG', 50, rotation=0, null)
             .then((resizedImageUri) => {
-              console.log("resizedImageUri",resizedImageUri);
+              // console.log("resizedImageUri",resizedImageUri);
               formData.append("image", {
               uri: resizedImageUri.uri,
               type: 'image/jpeg',
@@ -103,8 +119,8 @@ async onSignupPressed(){
             });
 
         try {
-            console.log("yes form", formData)
-            let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/register', {
+            // console.log("yes form", formData)
+            let response = fetch('http://localhost:8000/register', {
                     method: 'POST',
                     headers: {
                       'Accept': 'application/json',
@@ -112,12 +128,12 @@ async onSignupPressed(){
                     },
                     body: formData,
                   }).then(response => {
-                    console.log("response ....",response)
+                    // console.log("response ....",response)
                       if (response.status == 200) {
                         this.setState({loader : false});
                         this.props.navigation.navigate('Login');
                     } else {
-                        console.log("error");
+                        // console.log("error");
                     }
                   });
             // let res = await response.text()
@@ -139,7 +155,7 @@ async onSignupPressed(){
             })
         }
         else {
-          console.log("No")
+          // console.log("No")
           try {
             let response = await fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/register', {
               method: 'POST',
@@ -174,6 +190,7 @@ async onSignupPressed(){
             this.setState({errors: errorsArray})
           }
         }
+     }
   }
 
 render() {
@@ -202,60 +219,52 @@ render() {
                      })
                  }}
                  >
-                 <Image
+                 <Entypo
                   style={{
-                    width: 90,
-                    height: 90,
+                    
+                    alignSelf: 'center',
                     borderRadius: 45,
                    }}
-                   resizeMode='cover'
-                   source={{
-                     uri: ( this.state.imageUrl ? "file://"+this.state.imageUrl : "https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg")
-                   }}
+                   size= {80}
+                   color = 'black'
+                   name= 'user'
                  />
                  <MaterialIcons style={{color:'#ff0046', position : 'absolute', right: -2, bottom : -2, borderWidth: 2, width: 30, height: 30, borderRadius: 15, borderColor: '#fff'}} name={'add-circle'} size={30} />
                </PhotoUpload>
               </View>
 
-              <TextField
-                label='User Name'
-                onChangeText={ (text)=> this.setState({username: text}) }
-                titleFontSize={16}
-                textColor='#373737'
-                fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'
-                baseColor='#aaaeae'
-                ContainerStyle={{
-                  padding: 0
-                }}
+              <View style = {{flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', width: '100%',
+              paddingVertical: 20}}>
+              <TextInput
+                style = {{width: '100%', color: '#373737',fontSize: 16}}
+                underlineAndroidColor= '#aaaeae'
+                placeholder='Username'
+                placeholderTextColor= '#aaaeae'
+                placeholderTextSize= {18}
+                onChangeText={ (text)=> this.setState({username: text})}
               />
 
-             <TextField
-                label='Email Address'
-                onChangeText={ (text)=> this.setState({email: text}) }
-                titleFontSize={16}
-                textColor='#373737'
-                fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'
-                baseColor='#aaaeae'
+             <TextInput
+                style = {{width: '100%', color: '#373737',fontSize: 16}}
+                underlineAndroidColor= '#aaaeae'
+                placeholder='Email'
+                placeholderTextColor= '#aaaeae'
+                placeholderTextSize= {18}
+                onChangeText={ (text)=> this.setState({email: text})}
+                keyboardType= 'email-address'
               />
 
-               <TextField
-                label='Password'
-                onChangeText={ (text)=> this.setState({password: text}) }
-                keyboardType='email-address'
-                titleFontSize={16}
-                textColor='#373737'
-                fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'  security
-                baseColor='#aaaeae'
-                labelTextStyle= {{
-                  color: '#999296'
-                }}
+
+              <TextInput
+                style = {{width: '100%', color: '#373737',fontSize: 16}}
+                underlineAndroidColor= '#aaaeae'
+                placeholder='Password'
+                placeholderTextColor= '#aaaeae'
+                placeholderTextSize= {18}
+                secureTextEntry={true}
+                onChangeText={ (text)=> this.setState({password: text})}
               />
+              </View>
 
                <Errors errors={this.state.errors}/>
               <Button block style={styles.LoginButton} onPress = {this.onSignupPressed.bind(this)} >

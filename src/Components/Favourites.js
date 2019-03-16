@@ -3,24 +3,19 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,Image,ListView,ImageBackground,TouchableOpacity, FlatList, ActivityIndicator
+  View,Image,ImageBackground,TouchableOpacity, FlatList, ActivityIndicator
 } from 'react-native';
 import { connect } from 'react-redux';
 import {saveUserData, savePopularVideosData, updateVideosData} from '../redux/reducers/tasks';
 import Icon from 'react-native-vector-icons/Ionicons';
-import ActionButton from 'react-native-action-button';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Entypo from 'react-native-vector-icons/Entypo';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import Video from 'react-native-af-video-player';
 import VideoCard from './VideoCard.js';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
 const theme = {
     title: '#FFF',
@@ -41,9 +36,11 @@ class Favourites extends Component{
   static navigationOptions = {
     tabBarLabel: 'Popular',
     tabBarIcon: ({ tintColor }) => (
-      <Image
-        source={require('./star.png')}
-        style={[styles.icon, {tintColor: tintColor}]}
+      <EvilIcons
+        name= 'star'
+        size= {30}
+        color= '#f5f6fa'
+        style={{tintColor: tintColor}}
       />
     ),
   };
@@ -78,7 +75,7 @@ class Favourites extends Component{
                 return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }
 
@@ -103,7 +100,7 @@ class Favourites extends Component{
                 return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }, 10000)
   }
@@ -128,7 +125,7 @@ class Favourites extends Component{
                   this.props.updateVideosData(followedId, true)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
@@ -151,24 +148,74 @@ class Favourites extends Component{
                   this.props.updateVideosData(unFollowedId, false)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
 displayImages(popularVideos, index){
-  console.log("the console", popularVideos);
   var {navigate} = this.props.navigation;
     return(
       <View style={styles.container}>
-         <VideoCard videoInfo = {popularVideos} followRequest = {this.followRequest} unFollowRequest = {this.unFollowRequest} />
+         <VideoCard videos = {this.state.popularVideos} videoInfo = {popularVideos} index= {index} dislike= {this.onSwipeLeft} like= {this.onSwipeRight} followRequest = {this.followRequest} unFollowRequest = {this.unFollowRequest} navigation= {this.props.navigation} />
+          <View style= {{justifyContent: 'center', alignItems: 'center', padding: 4, position: 'absolute', bottom: 18, right: 4}}>
+            <Entypo name="resize-full-screen" size= {28} color= 'red' style={{alignSelf: 'center'}} onPress={()=> this.wrapToSend(popularVideos)} />
+          </View>
       </View>
     );
   }
+
+  wrapToSend(popularVideos) {
+      // alert("hey")
+      this.props.navigation.navigate('FullView', { thumbnail: popularVideos });
+  }
+
+  onSwipeRight = (cardIndex) => {
+    // alert('like')
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/likeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: this.state.popularVideos[cardIndex]._id
+                  })
+                }).then(response => {
+                  console.log("that's the response", response)
+              })
+        } catch(error) {
+            console.log("error " + error);
+      }
+  };
+
+  onSwipeLeft = (cardIndex) => {
+    // alert('dislike')
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/dislikeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: this.state.popularVideos[cardIndex]._id
+                  })
+                }).then(response => {
+                  console.log("that's the response", response)
+              })
+        } catch(error) {
+            console.log("error " + error);
+      }
+  };
 
   render() {
     var {navigate} = this.props.navigation;
     // var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     // var cloneUsers = ds.cloneWithRows(this.props.popularVideos);
+    // alert(JSON.stringify(this.state.popularVideos[0]));
     return (
     <View style={{flex: 1,}}>
       {
@@ -188,14 +235,14 @@ displayImages(popularVideos, index){
           ItemSeparatorComponent={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
         />
       }
-        <ActionButton
-          buttonColor="#ff0046"
-          offsetY = {30}
-          offsetX = {30}
-          size ={56}
-          onPress={() => navigate ("VideoCapture", {})}
-          icon={<MaterialIcons name='videocam' size={28} style={styles.actionButtonIcon} />}>
-        </ActionButton>
+        <View
+          style= {{ position: 'absolute', right: 6, bottom: 6, zIndex: 1000, width: 50, height: 50, borderRadius: 25, backgroundColor: '#ff0046', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity
+            onPress={() => navigate ("VideoCapture", {})}>
+
+          <MaterialIcons name='videocam' size={30} style={styles.actionButtonIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -214,6 +261,9 @@ const styles = StyleSheet.create({
   icon: {
     width: 26,
     height: 26,
+  },
+  listView: {
+    padding: 10
   },
   container: {
     flex: 1,

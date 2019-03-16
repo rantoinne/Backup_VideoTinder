@@ -3,25 +3,22 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,Image,ListView,TouchableOpacity,ImageBackground,TouchableHighlight,AsyncStorage,ActivityIndicator
+  View,Image,ListView,TouchableOpacity,ImageBackground,TouchableHighlight,AsyncStorage,ActivityIndicator, Dimensions, TouchableWithoutFeedback
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ActionButton from 'react-native-action-button';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import IonIcon from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import VideoPlayer from 'react-native-video-player';
 import Orientation from 'react-native-orientation';
 import { ImageCacheManager } from "react-native-cached-image";
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
 const theme = {
     title: '#FFF',
     more: 'transparent',
@@ -49,10 +46,11 @@ export default class LikesVideoCard extends Component{
       opacity: 0,
       cachedVideoURI: this.props.card.streamingUrl,
     };
+    this.volume = 1.0;
   }
 
   onLoadStart = () => {
-    console.log("HELLO I AM LOAD and start");
+    // console.log("HELLO I AM LOAD and start");
     this.setState({opacity: 1});
   }
 
@@ -61,16 +59,16 @@ export default class LikesVideoCard extends Component{
   }
 
   onStart = () => {
-    console.log("I am activityindicator with starting")
-    console.log("HELLO I AM LOADING AND CACHE");
+    // console.log("I am activityindicator with starting")
+    // console.log("HELLO I AM LOADING AND CACHE");
     ImageCacheManager({})
     .downloadAndCacheUrl(this.props.card.streamingUrl)
     .then(res => {
-      console.log("imagecaching", res)
+      // console.log("imagecaching", res)
       this.setState({ cachedVideoURI: res });
      })
     .catch(err => {
-      console.log("Caching", err);
+      // console.log("Caching", err);
     });
   }
 
@@ -95,40 +93,40 @@ export default class LikesVideoCard extends Component{
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  componentDidUnmount() {
+    this.volume = 0.0;
+    // alert('solo')
+  }
+
+  renderProfilePic(data) {
+      if(data.userProfilePic) {
+        return (       
+            <TouchableOpacity style= {{justifyContent: 'center', alignItems: 'center'}} onPress={()=> this.props.navigation.navigate('ViewProfile', {user: data} )}>
+              <Thumbnail source={{uri: data.userProfilePic}} style={{height: 40, width: 40, marginHorizontal: 10}} />
+            </TouchableOpacity>
+        );
+      }
+
+      else {
+        return (
+          <View style= {{ width: 50, height: 50, borderRadius: 25, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', padding: 4, elevation: 4}}>
+            <Entypo name= 'user' size = {34} color= 'gray' style= {{alignSelf: 'center'}} onPress={()=> this.props.navigation.navigate('ViewProfile', {user: data} )} />
+          </View>
+        );
+      }
+    }
+
+    componentDidMount() {
+      // alert('solo')
+    }
+
   render() {
     const card =  this.props.card;
-   // console.log("checker", this.props.followers.username, this.props.followers.following)
+    // alert(JSON.stringify(card))
     return (
-          <View style={{flex: 1, backgroundColor: '#f5f5f5'}}>
-            <CardItem style={{height: 48,borderWidth:0}}>
-              <Left>
-              <Thumbnail source={{uri: card.userProfilePic ? card.userProfilePic : "https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg"}} style={{height: 40, width: 40}} />
-                <Body>
-                  <Text style={styles.uploaderName}>{this.Capitalize(card.username)}</Text>
-                </Body>
-              </Left>
-              <Right>
-              { this.state.follow ?
-                this.state.follow == 'self' ?
-                  <Text></Text>
-                :
-                <TouchableHighlight underlayColor = '#fff' onPress={()=>this.updateTitleStatus(card.userId, "unfollow")}>
-                  <Image
-                    source={require('./unfollow.png')}
-                    style={{height: 23, width: 42}}
-                  />
-                </TouchableHighlight>
-                :
-                <TouchableHighlight underlayColor = '#fff' onPress={()=>this.updateTitleStatus(card.userId, "follow")}>
-                  <Image
-                    source={require('./follow.png')}
-                    style={{height: 23, width: 42}}
-                  />
-                </TouchableHighlight>
-              }
-              </Right>
-            </CardItem>
-            <ImageBackground source={{uri: card.thumbnail}} style={{width: null,height: null}}>
+          <View >
+            
+            <ImageBackground source={{uri: card.thumbnail}} style={{width: SCREEN_WIDTH - 40,height: null}}>
               <ActivityIndicator
                 animating={true}
                 size={30}
@@ -136,44 +134,82 @@ export default class LikesVideoCard extends Component{
                 style={[styles.activityIndicator, {opacity: this.state.opacity}]}
               />
               <VideoPlayer
-                disableSeek
-                defaultMuted
+                defaultMuted= {false}
+                volume={this.volume}
+                ref={r => this.player = r}
                 endWithThumbnail
                 thumbnail={{ uri: card.thumbnail }}
                 video={{ uri: this.state.cachedVideoURI}}
-                videoHeight={1250}
+                videoHeight={SCREEN_HEIGHT * 2.4}
+                fullScreenOnLongPress= {true}
                 resizeMode={'cover'}
-                disableFullscreen
                 pauseOnPress
                 onBuffer={this.onBuffer}
                 onLoadStart={this.onLoadStart}
+                disableControlsAutoHide={true}
                 onLoad={this.onLoad}
-                onStart={this.onStart}
+                autoplay={false}
               />
+              <View style= {{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' , width: '100%', height: 50, top: 4, left: 4, position: 'absolute', zIndex: 1000, padding: 4}}>
+
+              <View style= {{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+
+              {
+                this.renderProfilePic(card)
+              }
+
+              </View>
+
+              <View style= {{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+
+              { this.state.follow ?
+                this.state.follow == 'self' ?
+                  <Text></Text>
+                :
+                <View style={{height: 25, width: 45, borderRadius: 14, padding: 4, backgroundColor: '#f5f6fa', justifyContent: 'center', alignItems: 'center', marginRight: 4}}>
+                <TouchableWithoutFeedback
+                  onPress={()=>this.updateTitleStatus(card.userId, "unfollow")}>
+                  <Feather
+                    size={23}
+                    style= {{marginRight: 4}}
+                    color= '#E91E63'
+                    name= 'user-check'
+                  />
+                </TouchableWithoutFeedback>
+                </View>
+                :
+                <View style={{height: 25, width: 45, borderRadius: 14,padding: 4, backgroundColor: '#f5f6fa', justifyContent: 'center', alignItems: 'center', marginRight: 4}}>
+                <TouchableWithoutFeedback
+                    onPress={()=>this.updateTitleStatus(card.userId, "follow")}>
+                  <Feather
+                    size={23}
+                    color= 'black'
+                    style= {{marginRight: 4}}
+                    name= 'user-plus'
+                  />
+                </TouchableWithoutFeedback>
+                </View>
+              }
+              </View>
+              </View>
+
+
+              <View style= {{ flexDirection: 'row', justifyContent: 'flex-start', width: '80%', height: 65, bottom: 28, left: 0, position: 'absolute', zIndex: 1000, marginHorizontal: 20, alignSelf:'flex-start' }}>
+
+              <View style= {{ flexDirection: 'column', justifyContent: 'space-around', alignItems: 'center' }}>
+                <Text style={styles.uploaderName}>{this.Capitalize(card.username)}</Text>
+                <Text style={styles.uploaderDesc}>{card.description === "" ? "No Description": card.description}</Text>
+              </View>
+              </View>
+
+              <View style= {{ flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 50, right: 8, position: 'absolute' }}>
+                {card.likesCount === 0 ? <Icon style={{color:'#000'}} name={'md-heart'} size={50}/> : <Icon style={{color:'#f00039'}} name={'md-heart'} size={50}/>  }
+                <Text style={{fontFamily: 'Montserrat-Regular',fontSize: 16, color: 'white', position: 'absolute', top: 12}}>{card.likesCount}</Text>
+              </View>
+
+
               </ImageBackground>
-            <CardItem style={{height: 48,borderWidth:0,}}>
-              <Left>
-                  {card.likesCount === 0 ? <Icon style={{color:'#000'}} name={'md-heart'} size={20}/> : <Icon style={{color:'#f00039'}} name={'md-heart'} size={20}/>  }
-                <Text style={{marginLeft:4,fontFamily: 'Montserrat-Regular',fontSize: 12, color: '#36292a'}}>{card.likesCount}</Text>
-                {/* <Image
-                    source={require('./mention.png')}
-                    style={{height: 20, width: 20, marginLeft: 15}}
-                /> */}
-              </Left>
-              <Body>
-                <Button transparent>
-
-                </Button>
-              </Body>
-              <Right>
-
-              </Right>
-            </CardItem>
-            <CardItem style={{borderWidth:0,paddingBottom:4}}>
-              <Left style={{marginTop: -15}}>
-                  <Text style={styles.status}>{card.description ? card.description : "" }</Text>
-              </Left>
-            </CardItem>
+                 
          </View>
     );
   }
@@ -189,8 +225,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fefefe'
   },
   uploaderName:{
-    fontSize: 16,
-    color: '#36292a'
+    fontSize: 18,
+    fontFamily: 'Montserrat-Light',
+    color: 'white',
+    alignSelf: 'flex-start'
+  },
+  uploaderDesc:{
+    fontSize: 14,
+    fontFamily: 'Montserrat-Light',
+    color: 'white',
+    alignSelf: 'flex-start',
+    opacity: 0.8
   },
   actionButtonIcon: {
     color: '#fefefe',
@@ -216,7 +261,7 @@ const styles = StyleSheet.create({
   activityIndicator : {
     position: 'absolute',
         top: 20,
-        right: 10,
+        right: (SCREEN_WIDTH / 2) - 50 ,
   },
   status: {
     fontSize: 16,

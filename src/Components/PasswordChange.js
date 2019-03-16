@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   Image,
-  View,TouchableOpacity,ImageBackground,TouchableHighlight,ListView,Alert,AsyncStorage,ActivityIndicator
+  View,TouchableOpacity,ImageBackground,TouchableHighlight,ListView,Alert,AsyncStorage,ActivityIndicator, TextInput
 } from 'react-native';
 
 import { TabNavigator, StackNavigator } from 'react-navigation';
@@ -44,9 +44,6 @@ export default class PasswordChange extends Component {
 
      async submitForm(e) {
         this.setState({loader: true})
-        if(this.state.currentPass == '' || this.state.newPass == '' || this.state.reNewPass == '')
-          Alert.alert('All Fields are necessary');
-          else
             try {
       let response = await fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/changePassword', {
                   method: 'POST',
@@ -68,7 +65,7 @@ export default class PasswordChange extends Component {
       } else {
           //Handle error
           let error = res;
-          console.log("error", error)
+          // console.log("error", error)
           Alert.alert(
           'Invalid current Password'
           )
@@ -76,7 +73,7 @@ export default class PasswordChange extends Component {
     } catch(error) {
         this.removeToken();
         this.setState({error: error});
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }
 
@@ -97,7 +94,7 @@ export default class PasswordChange extends Component {
             return null
           }
         }).catch(err => {
-          console.log("in error", err)
+          // console.log("in error", err)
         })
       }
 
@@ -107,36 +104,23 @@ export default class PasswordChange extends Component {
         this.setState({
           currentPass : event,
         });
-         if(!nameRegex.test(event)){
-           this.setState({currentPassError: 'Field is required', currentPass: false});
-         }
-         else {
+         
            this.setState({currentPass: event, currentPassError: ""});
-         }
+         
         }
         else if(fieldSegment == 'newPass'){
         this.setState({
           newPass : event,
           // fieldError: '',
         });
-         if(!nameRegex.test(event)){
-           this.setState({newPassError: 'Field is required', newPass: false});
-         }
-         else {
            this.setState({newPass: event, newPassError: ""});
-         }
       }
       else if(fieldSegment == 'reNewPass'){
         this.setState({
           reNewPass : event,
           // fieldError: '',
         });
-       if(!nameRegex.test(event)){
-         this.setState({reNewPassError: 'Field is required', reNewPass: false});
-       }
-       else {
          this.setState({reNewPass: event, reNewPassError: ""});
-       }
       }
     }
 
@@ -168,43 +152,29 @@ render() {
 
 
             <View style={{paddingLeft: 15, paddingRight: 35}}>
-              <TextField
-                label='Current Password'
+              <TextInput
+                placeholder='Current Password'
                 onChangeText={(event) => this.fieldValue('currentPass' , event)}
                 titleFontSize={16}
                 value={this.state.currentPass}
-                textColor='#373737'
-                fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'
-                baseColor='#aaaeae'
-                error = {this.state.currentPassError}
+                placeholderColor='#373737'
               />
 
-              <TextField
-                label='New Password'
+              <TextInput
+                placeholder='New Password'
                 onChangeText={(event) => this.fieldValue('newPass' , event)}
                 titleFontSize={16}
-                textColor='#373737'
+                placeholderColor='#373737'
                 value={this.state.newPass}
                 fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'
-                baseColor='#aaaeae'
-                error = {this.state.newPassError}
               />
 
-              <TextField
-                label='Re-enter Password'
+              <TextInput
+                placeholder='Re-enter Password'
                 onChangeText={(event) => this.fieldValue('reNewPass' , event)}
                 titleFontSize={16}
-                textColor='#373737'
+                placeholderColor='#373737'
                 value={this.state.reNewPass}
-                fontSize= {18}
-                labelFontSize={14}
-                tintColor='#aaaeae'
-                baseColor='#aaaeae'
-                error = {this.state.reNewPassError}
               />
             </View>
             { this.state.loader &&

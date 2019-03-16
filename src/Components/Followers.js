@@ -10,12 +10,6 @@ import { TabNavigator, StackNavigator } from 'react-navigation';
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
 import FollowCards from './FollowCards.js'
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
 class Followers extends Component{
   static navigationOptions = {
@@ -56,7 +50,7 @@ class Followers extends Component{
                   return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
 
 
@@ -74,7 +68,7 @@ class Followers extends Component{
         return null
       }
     }).catch(err => {
-      console.log("in error", err)
+      // console.log("in error", err)
     })
   }
 
@@ -95,7 +89,7 @@ class Followers extends Component{
                   var newUser = {...userObj, followingCount: userObj.followingCount + 1}
                   this.props.saveUserData(newUser)              })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
@@ -117,7 +111,7 @@ class Followers extends Component{
                   this.props.saveUserData(newUser)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 

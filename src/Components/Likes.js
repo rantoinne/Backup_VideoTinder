@@ -10,17 +10,12 @@ import {saveUserData, saveLikedVideosData, updateVideosData} from '../redux/redu
 import Icon from 'react-native-vector-icons/Ionicons';
 import ActionButton from 'react-native-action-button';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
 import Video from 'react-native-af-video-player';
 import VideoCard from './VideoCard.js';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
 const theme = {
     title: '#FFF',
@@ -41,9 +36,11 @@ const theme = {
   static navigationOptions = {
     tabBarLabel: 'Likes',
     tabBarIcon: ({ tintColor }) => (
-      <Image
-        source={require('./heart.png')}
-        style={[styles.icon, {tintColor: tintColor}]}
+      <FontAwesomeIcon
+        name= 'heart-o'
+        color= '#f5f6fa'
+        size= {26}
+        style={{tintColor: tintColor}}
       />
     ),
   };
@@ -55,6 +52,80 @@ const theme = {
       likedVideos : [],
       loader: true
     };
+    this.volume = 1.0;
+  }
+
+  onSwipeRight = (cardIndex, video) => {
+    // alert('like')
+    // var a = Object.assign(this.state.likedVideos)
+    // a.splice(cardIndex,1);
+    // this.setState({likedVideos : a});
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/likeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: video._id
+                  })
+                }).then(response => {
+                  // console.log("that's the response", response)
+              })
+        } catch(error) {
+            // console.log("error " + error);
+      }
+  };
+
+  onSwipeLeft = (cardIndex, video) => {
+    alert(JSON.stringify(this.state.likedVideos[cardIndex]))
+    // var a = Object.assign(this.state.likedVideos)
+    // a.splice(cardIndex,1);
+    // this.setState({likedVideos : a});
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/dislikeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: video._id
+                  })
+                }).then(response => {
+                  // console.log("that's the response", response)
+              })
+        } catch(error) {
+            // console.log("error " + error);
+      }
+  };
+
+  fetchAgain() {
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/displayLikedVideos', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                  })
+                }).then(response => {
+                  this.setState({
+                    likedVideos : JSON.parse(response._bodyText)
+                  })
+                  this.props.saveLikedVideosData(JSON.parse(response._bodyText))
+
+                return response.json().then(error => ({ error }));
+              })
+    } catch(error) {
+        console.log("error " + error);
+    }
+    // alert('fetched');
   }
 
   componentWillMount() {
@@ -78,11 +149,17 @@ const theme = {
                 return response.json().then(error => ({ error }));
               })
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
+  }
+  componentWillUnmount() { 
+    this.volume = 0.0;
+    // alert('unmount')
   }
 
   componentDidMount(){
+    // alert('mount')
+    this.volume = 1.0;
   this.timer = setInterval(()=> {
     try {
       let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/displayLikedVideos', {
@@ -128,7 +205,7 @@ const theme = {
                   this.props.updateVideosData(followedId, true)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
@@ -151,18 +228,31 @@ const theme = {
                   this.props.updateVideosData(unFollowedId, false)
               })
         } catch(error) {
-            console.log("error " + error);
+            // console.log("error " + error);
       }
   }
 
+  changeVolume(index) {
+    alert('go')
+  }
 
-displayImages(likedVideos){
+displayImages(likedVideos, index){
   var {navigate} = this.props.navigation;
     return(
     <View style={styles.container}>
-         <VideoCard videoInfo = {likedVideos} followRequest = {this.followRequest} unFollowRequest = {this.unFollowRequest} />
-       </View>
+    <TouchableOpacity onPress={()=> this.changeVolume(index)}>
+         <VideoCard changeVolume= {this.changeVolume} volume= {this.volume} videos = {this.state.likedVideos} videoInfo = {likedVideos} index= {index} fetchAgain={this.fetchAgain}
+          dislike= {this.onSwipeLeft} like= {this.onSwipeRight} followRequest = {this.followRequest} unFollowRequest = {this.unFollowRequest} navigation= {this.props.navigation} />
+         <View style= {{justifyContent: 'center', alignItems: 'center', padding: 4, position: 'absolute', bottom: 14, right: 4}}>
+            <Entypo name="resize-full-screen" size= {24} color= 'red' style={{alignSelf: 'center'}} onPress={()=> this.wrapToSend(likedVideos)} />
+          </View>
+    </TouchableOpacity>
+   </View>
     );
+  }
+
+  wrapToSend(popularVideos) {
+    this.props.navigation.navigate('FullView', { thumbnail: popularVideos });
   }
 
   render() {
@@ -184,7 +274,7 @@ displayImages(likedVideos){
         <FlatList
           style={styles.listView}
           data={this.state.likedVideos}
-          renderItem={({item}) => this.displayImages(item)}
+          renderItem={({item, index}) => this.displayImages(item, index)}
           ItemSeparatorComponent={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
         />
       }

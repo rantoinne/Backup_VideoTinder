@@ -45,24 +45,11 @@ render() {
                       </Body>
                     </Left>
                     <Right>
-                    <Image
-                      source={require('./follow.png')}
-                      style={{height: 23, width: 42}}
-                    />
-                    </Right>
-                </CardItem>             
-                
-                <CardItem style={{height:72,borderWidth:0,backgroundColor: '#fefefe',borderBottomWidth:1,borderColor: '#dadddf' }}>
-                    <Left>
-                      <Thumbnail source={{ uri: 'https://i.pinimg.com/564x/a5/4d/4d/a54d4d37522a76a67002fa25b8e51515.jpg'}} style={{height: 40, width: 40}} />
-                      <Body>
-                        <Text style={styles.uploaderName}>Amrita Arora</Text>
-                      </Body>
-                    </Left>
-                    <Right>
-                      <Image
-                        source={require('./follow.png')}
-                        style={{height: 23, width: 42}}
+                    <Feather
+                        name= 'user-plus'
+                        color= 'black'
+                        size= {30}
+                        style={{alignSelf: 'center'}}
                       />
                     </Right>
                 </CardItem>             
@@ -75,9 +62,28 @@ render() {
                       </Body>
                     </Left>
                     <Right>
-                      <Image
-                        source={require('./follow.png')}
-                        style={{height: 23, width: 42}}
+                      <Feather
+                        name= 'user-plus'
+                        color= 'black'
+                        size= {30}
+                        style={{alignSelf: 'center'}}
+                      />
+                    </Right>
+                </CardItem>             
+                
+                <CardItem style={{height:72,borderWidth:0,backgroundColor: '#fefefe',borderBottomWidth:1,borderColor: '#dadddf' }}>
+                    <Left>
+                      <Thumbnail source={{ uri: 'https://i.pinimg.com/564x/a5/4d/4d/a54d4d37522a76a67002fa25b8e51515.jpg'}} style={{height: 40, width: 40}} />
+                      <Body>
+                        <Text style={styles.uploaderName}>Amrita Arora</Text>
+                      </Body>
+                    </Left>
+                    <Right>
+                      <Feather
+                        name= 'user-check'
+                        color= 'black'
+                        size= {30}
+                        style={{alignSelf: 'center'}}
                       />
                     </Right>
                 </CardItem>                  
@@ -94,9 +100,11 @@ render() {
                       </Body>
                     </Left>
                     <Right>
-                      <Image
-                        source={require('./follow.png')}
-                        style={{height: 23, width: 42}}
+                      <Feather
+                        name= 'user-plus'
+                        color= 'black'
+                        size= {30}
+                        style={{alignSelf: 'center'}}
                       />
                     </Right>
                 </CardItem>                 

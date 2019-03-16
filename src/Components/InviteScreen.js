@@ -54,7 +54,7 @@ export default class InviteScreen extends Component {
           })
         .catch((error) => {
           this.importingContactInfo = false;
-          console.log("ERROR MESSAGE: ", error.message);
+          // console.log("ERROR MESSAGE: ", error.message);
         });
     }
   }
@@ -88,7 +88,7 @@ export default class InviteScreen extends Component {
           });
 
 } catch(error) {
-  console.log("error " + error);
+  // console.log("error " + error);
 }
   }
 

@@ -65,7 +65,7 @@ export default class FullScreenVid extends Component {
               })
 
     } catch(error) {
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }
 
@@ -82,7 +82,7 @@ export default class FullScreenVid extends Component {
               <View style={styles.container}>
                 <VideoPlayer
                   disableSeek
-                  defaultMuted
+                  autoplay= {true}
                   endWithThumbnail
                   thumbnail={{ uri: item.thumbnail }}
                   video={{ uri: item.streamingUrl }}

@@ -3,24 +3,22 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,Image,ListView,TouchableOpacity,ImageBackground,TouchableHighlight,AsyncStorage,ActivityIndicator
+  View,Image,ListView,TouchableOpacity,ImageBackground,TouchableHighlight,AsyncStorage,ActivityIndicator, Dimensions, TouchableWithoutFeedback
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import ActionButton from 'react-native-action-button';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import { Col, Row, Grid } from 'react-native-easy-grid';
+import {saveUserData, saveNewVideosData, updateVideosData } from '../redux/reducers/tasks';
+import { connect } from 'react-redux';
 import VideoPlayer from 'react-native-video-player';
 import Orientation from 'react-native-orientation';
 import { ImageCacheManager } from "react-native-cached-image";
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const theme = {
     title: '#FFF',
@@ -36,7 +34,7 @@ const theme = {
     fullscreen: 'transparent',
   };
 
-export default class VideoCard extends Component{
+class VideoCard extends Component{
 
     static navigationOptions = {
        header: false,       
@@ -47,14 +45,19 @@ export default class VideoCard extends Component{
     this.state = {
       follow: this.props.videoInfo.followingUser,
       cachedVideoURI: this.props.videoInfo.streamingUrl,
-      opacity: 0
+      opacity: 0,
+      socialise: true
     };
+    this.volume = 0.0;
   }
 
-  componentDidMount() {
-    console.log("video file url", this.props.videoInfo.streamingUrl)
-   
-}
+  componentDidUpdate() {
+    // this.volume = 1.0;
+  }
+
+  componentWillUnmount() {
+    // this.player.pause();
+  }
 
   onLoadStart1 = () => {
     this.setState({opacity: 1});
@@ -63,12 +66,20 @@ export default class VideoCard extends Component{
     ImageCacheManager({})
     .downloadAndCacheUrl(this.props.videoInfo.streamingUrl)
     .then(res => {
-      console.log("imagecaching", res)
+      // console.log("imagecaching", res)
       this.setState({ cachedVideoURI: res });
      })
     .catch(err => {
-      console.log("Caching", err);
+      // console.log("Caching", err);
     });
+    let index = this.checkMeBeforeIndex();
+    if(index === this.props.index) {
+      this.volume = 1.0;
+    }
+    else {
+      this.player.pause();
+    }
+
   }
 
 onLoad = () => {
@@ -91,15 +102,117 @@ onBuffer = ({isBuffering}) => {
         });
     }
 
+    renderProfilePic(data) {
+      if(data.userProfilePic) {
+        return (  
+              <TouchableOpacity style= {{justifyContent: 'center', alignItems: 'center'}} onPress={()=> this.props.navigation.navigate('ViewProfile', {user: data} )}>     
+              <Thumbnail source={{uri: data.userProfilePic}} style={{height: 40, width: 40}} />
+              </TouchableOpacity>
+        )
+      }
+
+      else {
+        return (
+          <View style= {{ width: 46, height: 46, borderRadius: 23, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', padding: 4, elevation: 4}}>
+          <Entypo name= 'user' size = {34} color= 'gray' style= {{alignSelf: 'center'}} 
+          onPress={()=> this.props.navigation.navigate('ViewProfile', {user: data} )}
+          />
+          </View>
+        )
+      }
+    }
+
+    judgeVideo(index) {
+      if(!this.state.socialise) {
+        this.props.like(index, this.props.videos[index]);
+      }
+      else {
+        this.props.dislike(index, this.props.videos[index]);
+      }
+      this.setState({ socialise: !this.state.socialise });
+    }
+
+    onSwipeRight = (cardIndex) => {
+    this.setState({socialise: !this.state.socialise});
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/likeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: this.props.videos[cardIndex]._id
+                  })
+                }).then(response => {
+                  console.log("that's the response", response)
+              })
+        } catch(error) {
+            console.log("error " + error);
+      }
+      this.props.fetchAgain();
+  };
+
+  onSwipeLeft = (cardIndex) => {
+    // alert('press')
+    this.setState({socialise: !this.state.socialise});
+    try {
+      let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/dislikeVideo', {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      userId: this.props.user._id,
+                      videoId: this.state.videos[cardIndex]._id
+                  })
+                }).then(response => {
+                  // console.log("that's the response", response)
+              })
+        } catch(error) {
+            // console.log("error " + error);
+      }
+      this.props.fetchAgain();
+      // alert('Done')
+  };
+
+  checkMeBeforeIndex() {
+    var indexa = -1;
+    this.props.videos.map((item, index)=> {
+      if(item.streamingUrl === this.props.videoInfo.streamingUrl) {
+        // alert(index)
+        indexa = index
+      }
+    });
+    return indexa;
+  }
+
+  checkCurrentIndex(index) {
+    let indexIncoming = this.checkMeBeforeIndex()
+    if(index === indexIncoming) {
+      alert('match')
+    }
+    if(this.props.index === indexIncoming) {
+      // this.volume = 1.0;
+    }
+    else {
+      // this.volume= 0.0;
+    }
+  }
 
   render() {
     const videoInfo = this.props.videoInfo;
    // console.log("checker", this.props.followers.username, this.props.followers.following)
     return (
             <View style={{marginTop: 12}}>
-            <CardItem style={{height: 48,borderWidth:0,}}>
+            <CardItem style={{height: 50, borderWidth:0}}>
               <Left>
-                <Thumbnail source={{uri: videoInfo.userProfilePic ? videoInfo.userProfilePic : "https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg" }} style={{height: 40, width: 40}} />
+              {
+                this.renderProfilePic(videoInfo)
+              }
+                
                 <Body>
                   <Text style={styles.uploaderName}>{videoInfo.username}</Text>
                 </Body>
@@ -109,53 +222,71 @@ onBuffer = ({isBuffering}) => {
                 this.props.videoInfo.followingUser == 'self' ?
                   <Text></Text>
                 :
-                <TouchableHighlight underlayColor = '#fff' onPress={()=>this.updateTitleStatus(videoInfo.userId, "unfollow")}>
-                  <Image
-                    source={require('./unfollow.png')}
-                    style={{height: 23, width: 42}}
+                <View style={{height: 25, width: 45, borderRadius: 14,padding: 4, backgroundColor: '#f5f6fa', justifyContent: 'center', alignItems: 'center', marginRight: 4}}>
+                <TouchableWithoutFeedback
+                  onPress={()=>this.updateTitleStatus(videoInfo.userId, "unfollow")}>
+                  <Feather
+                    size={23}
+                    style= {{marginRight: 2}}
+                    color= '#E91E63'
+                    name= 'user-check'
                   />
-                </TouchableHighlight>
+                </TouchableWithoutFeedback>
+                </View>
                 :
-                <TouchableHighlight underlayColor = '#fff' onPress={()=>this.updateTitleStatus(videoInfo.userId, "follow")}>
-                  <Image
-                    source={require('./follow.png')}
-                    style={{height: 23, width: 42}}
+                <View style={{height: 25, width: 45, borderRadius: 14,padding: 4, backgroundColor: '#f5f6fa', justifyContent: 'center', alignItems: 'center', marginRight: 4}}>
+                <TouchableWithoutFeedback
+                    onPress={()=>this.updateTitleStatus(videoInfo.userId, "follow")}>
+                  <Feather
+                    size={23}
+                    color= 'black'
+                    style= {{marginRight: 2}}
+                    name= 'user-plus'
                   />
-                </TouchableHighlight>
+                </TouchableWithoutFeedback>
+                </View>
               }
               </Right>
             </CardItem>
-            <ImageBackground source={{uri: videoInfo.thumbnail}} style={{width: null,height: null}}>
+            <ImageBackground source={{ uri: videoInfo.thumbnail }} style={{width: null,height: null}}>
               <ActivityIndicator
                 animating={true}
                 size={30}
                 color="#ff0046"
                 style={[styles.activityIndicator, {opacity: this.state.opacity}]}
               />
+              <TouchableOpacity onPress={()=> this.checkCurrentIndex(this.props.index)} >
               <VideoPlayer
                 disableSeek
-                defaultMuted
+                defaultMuted= {false}
                 endWithThumbnail
+                volume={this.volume}
+                ref={r => this.player = r}
                 thumbnail={{ uri: videoInfo.thumbnail }}
                 video={{ uri: this.state.cachedVideoURI}}
-                videoHeight={811}
+                style={{
+                    width: SCREEN_WIDTH,
+                    height: 250
+                  }}
+                disableControlsAutoHide= {false}
                 resizeMode={'cover'}
-                disableFullscreen
+                disableFullscreen= {false}
+                playWhenInactive= {false}
+                playInBackground= {false}
                 pauseOnPress
                 onBuffer={this.onBuffer}
                 onLoadStart={this.onLoadStart1}
                 onLoad={this.onLoad}
                 onStart={this.onStart}
               />
+              </TouchableOpacity>
+
+            
             </ImageBackground>
            <CardItem style={{height: 40,borderWidth:0}}>
             <Left>
-              {videoInfo.likesCount === 0 ? <IonIcon name="md-heart" size={20} color="#000"/> : <IonIcon name="md-heart" size={20} color="#f00039"/> }
+              {!this.state.socialise ? <IonIcon name="md-heart" size={28} color="#000" onPress= {()=> this.judgeVideo(this.props.index)} /> : <IonIcon name="md-heart" size={28} color="#f00039" onPress= {()=> this.judgeVideo(this.props.index)} /> }
               <Text style={{marginLeft:4,fontFamily: 'Montserrat-Regular',fontSize: 14, color: '#36292a'}}>{videoInfo.likesCount}</Text>
-                  { /* <Image
-                    source={require('./mention.png')}
-                    style={{height: 20, width: 20, marginLeft: 15}}
-                  /> */ }
             </Left>
             <Body>
               <Button transparent>
@@ -221,3 +352,12 @@ const styles = StyleSheet.create({
     color: '#36292a',
   }
 });
+
+export default connect(state => ({
+     user: state.tasks.user,
+     newVideos: state.tasks.newVideos
+}), {
+  saveUserData: saveUserData,
+  updateVideosData: updateVideosData,
+  saveNewVideosData: saveNewVideosData,
+})(VideoCard)

@@ -9,14 +9,6 @@ import {
   View,TouchableOpacity,ImageBackground,ScrollView,AsyncStorage,Alert,ActivityIndicator
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
-
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -50,7 +42,7 @@ class Login extends Component {
         ]);
         //this.getToken();
     } catch (error) {
-      console.log("something went wrong", error)
+      // console.log("something went wrong", error)
     }
   }
 
@@ -87,6 +79,7 @@ class Login extends Component {
             imageUrl: result.user.imageUrl ? result.user.imageUrl : null
           }
           let accessToken = result.token;
+          // alert(JSON.stringify(response));
           this.storeToken(accessToken, JSON.stringify(userObj));
           this.props.saveUserData(userObj);
           //On success we will store the access_token in the AsyncStorage
@@ -102,7 +95,7 @@ class Login extends Component {
     } catch(error) {
         this.removeToken();
         this.setState({error: error});
-        console.log("error " + error);
+        // console.log("error " + error);
     }
   }
 
@@ -136,10 +129,13 @@ class Login extends Component {
                       />
                     </Item>
                   </View>
-                  <View style={{alignSelf: 'center', flex: 1}}>
+                  <View style={{alignSelf: 'center', flex: 1, flexDirection: 'column', justifyContent:'space-around', alignItems: 'center'}}>
                     <Button block transparent style={styles.LoginButton} onPress = { this.onLoginPressed.bind(this) } >
                       <Text style={styles.logintext}>Sign In</Text>
                     </Button>
+                    <Text style={styles.SignUpResendOtpText} onPress={()=> alert('okay')}>
+                      Forgot Password
+                    </Text>
                   </View>
                   <View style={{justifyContent: 'center'}}>
                     <Text style={styles.SignUpResendOtpText}>

@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   Image,
-  View,TouchableOpacity,ImageBackground,TouchableHighlight,ListView,AsyncStorage
+  View,TouchableOpacity,ImageBackground,TouchableHighlight,ListView,AsyncStorage, TouchableNativeFeedback, Alert
 } from 'react-native';
 import {saveUserData} from '../redux/reducers/tasks';
 import { connect } from 'react-redux';
@@ -11,7 +11,6 @@ import { TabNavigator, StackNavigator } from 'react-navigation';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Container, Header, Content, Card, CardItem, Thumbnail, Button, Left, Body, Right } from 'native-base';
-import Dialog from "react-native-dialog";
 
 class Settings extends Component {
 
@@ -36,8 +35,15 @@ class Settings extends Component {
     }
 
    confirmDialog = () => {
-    //this.props.saveUserData({});
-    this.setState({dialogVisible: true})
+    Alert.alert(
+      'Logout',
+      'Do you really want to logout ?',
+      [
+        {text: 'No', onPress: () => this.handleCancel()},
+        {text: 'Yes', onPress: () => this.removeToken()},
+      ],
+      { cancelable: false }
+    )
    }
 
   handleCancel = () => {
@@ -51,7 +57,7 @@ class Settings extends Component {
           ['token', 'user']);
           this.props.navigation.navigate('Landing');
     } catch (error) {
-      console.log("Something went wrong", error)
+      // console.log("Something went wrong", error)
     }
   }
 
@@ -59,60 +65,27 @@ render() {
   var {navigate} = this.props.navigation;
     return (
           <View style={{flex:1,backgroundColor: '#fefefe'}}>
-            <TouchableOpacity onPress = { () => navigate ("EditProfile", {}) } underlayColor = '#DFE1E3'>
-              <CardItem style={{borderBottomWidth:1,borderColor:'#dadddf', height: 60}}>
-                <Left>
+            <TouchableNativeFeedback onPress = { () => navigate ("EditProfile", {}) } underlayColor = '#DFE1E3'>
+              <View style={{borderBottomWidth:1, borderColor:'#dadddf', height: 60, width: '100%', padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                   <Text style={{color: '#36292a', fontSize: 14,fontFamily: 'Montserrat-Regular',}}>Edit Profile</Text>
-                </Left>
-                <Body>
-                  <Button transparent>
-                  </Button>
-                </Body>
-                <Right>
                   <IonIcon name="ios-arrow-forward" size={28} color="#999296"/>
-                </Right>
-              </CardItem>
-            </TouchableOpacity>
+              </View>
+            </TouchableNativeFeedback>
 
-            <TouchableOpacity onPress = { () => navigate ("PasswordChange", {}) } underlayColor = '#DFE1E3'>
-              <CardItem style={{borderBottomWidth:1,borderColor:'#dadddf',height: 60}}>
-                <Left>
+            <TouchableNativeFeedback onPress = { () => navigate ("PasswordChange", {}) } underlayColor = '#DFE1E3'>
+              <View style={{borderBottomWidth:1, borderColor:'#dadddf', height: 60, width: '100%', padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                   <Text style={{color: '#36292a', fontSize: 14,fontFamily: 'Montserrat-Regular',}}>Change Password</Text>
-                </Left>
-                <Body>
-                  <Button transparent>
-                  </Button>
-                </Body>
-                <Right>
                   <IonIcon name="ios-arrow-forward" size={28} color="#999296"/>
-                </Right>
-              </CardItem>
-            </TouchableOpacity>
+              </View>
+            </TouchableNativeFeedback>
 
-            <TouchableOpacity onPress = { () => this.confirmDialog() } underlayColor = '#DFE1E3'>
-              <CardItem style={{borderBottomWidth:1,borderColor:'#dadddf', height: 60}}>
-                <Left>
+            <TouchableNativeFeedback onPress = { () => this.confirmDialog() } underlayColor = '#DFE1E3'>
+              <View style={{borderBottomWidth:1, borderColor:'#dadddf', height: 60, width: '100%', padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                   <Text style={{color: '#36292a', fontSize: 14,fontFamily: 'Montserrat-Regular',}}>Logout</Text>
-                </Left>
-                <Body>
-                  <Button transparent>
-                  </Button>
-                </Body>
-                <Right>
                   <IonIcon name="ios-arrow-forward" size={28} color="#999296"/>
-                </Right>
-              </CardItem>
-            </TouchableOpacity>
-            <View>
-              <Dialog.Container visible={this.state.dialogVisible}>
-                <Dialog.Title>Logout</Dialog.Title>
-                <Dialog.Description>
-                  Do you really want to logout?
-                </Dialog.Description>
-                <Dialog.Button label="No" onPress= {() => this.handleCancel()} />
-                <Dialog.Button label="Yes" onPress= {() => this.removeToken()} />
-              </Dialog.Container>
-            </View>
+              </View>
+            </TouchableNativeFeedback>
+           
           </View>
     );
   }

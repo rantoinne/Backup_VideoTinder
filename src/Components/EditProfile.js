@@ -59,7 +59,7 @@ class EditProfile extends Component {
         ]);
         //this.getToken();
     } catch (error) {
-      console.log("Something went wrong", error)
+      // console.log("Something went wrong", error)
     }
   }
 
@@ -104,7 +104,7 @@ class EditProfile extends Component {
         ]);
         //this.getToken();
     } catch (error) {
-      console.log("Something went wrong", error)
+      // console.log("Something went wrong", error)
     }
   }
 
@@ -119,7 +119,7 @@ class EditProfile extends Component {
           if(this.state.imageUrl && this.state.imageUrl != "https://www.sparklabs.com/forum/styles/comboot/theme/images/default_avatar.jpg" && this.state.imageUrl != this.props.user.imageUrl){
           ImageResizer.createResizedImage("file://"+this.state.imageUrl, 1000, 1000, 'JPEG', 50, rotation=0, null)
           .then((resizedImageUri) => {
-            console.log("resizedImageUri",resizedImageUri);
+            // console.log("resizedImageUri",resizedImageUri);
             formData.append("image", {
             uri: resizedImageUri.uri,
             type: this.state.type,
@@ -144,22 +144,22 @@ class EditProfile extends Component {
                 this.setState({loader : false})
                 this.props.navigation.navigate('profile');
                 }).catch(function(error) {
-                console.log('There has been a problem with your fetch operation: ' + error);
+                // console.log('There has been a problem with your fetch operation: ' + error);
                  // ADD THIS THROW error
                   throw error;
                 });
             }
           catch (error) {
-              console.log('error : ' + error);
+              // console.log('error : ' + error);
               return error;
           }
         }).catch((err) => {
-          console.log("error in resizing image", err);
+          // console.log("error in resizing image", err);
         });
       }
       else {
           try {
-              console.log("hyhyhy",formData);
+              // console.log("hyhyhy",formData);
               let response = fetch("http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/editProfile", {
                   method: 'post',
                   body: formData,
@@ -177,13 +177,13 @@ class EditProfile extends Component {
                 this.setState({loader : false})
                 this.props.navigation.navigate('profile');
                 }).catch(function(error) {
-                console.log('There has been a problem with your fetch operation: ' + error);
+                // console.log('There has been a problem with your fetch operation: ' + error);
                  // ADD THIS THROW error
                   throw error;
                 });
             }
           catch (error) {
-              console.log('error : ' + error);
+              // console.log('error : ' + error);
               return error;
           }
 

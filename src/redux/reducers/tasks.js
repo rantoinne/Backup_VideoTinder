@@ -2,7 +2,7 @@ const defaultState = {
   user: {},
   popularVideos: [],
   likedVideos: [],
-  newVideos: []
+  newVideos: [],
 };
 
 export default function tasksReducer (state = defaultState, action) {
@@ -31,8 +31,11 @@ export default function tasksReducer (state = defaultState, action) {
       newVideos: action.newVideos
     }
 
+    // case 'save-current-index':
+    // return action.index;
+
     case 'update-videos-data':
-    console.log("tasks ka payload", action.payload)
+    // console.log("tasks ka payload", action.payload)
     return {
       ...state,
       popularVideos: state.popularVideos.map(video => {
@@ -73,17 +76,26 @@ export default function tasksReducer (state = defaultState, action) {
 }
 
 export function saveUserData(user) {
-    console.log(user);
-    console.log("Redux Implememtation",user);
+    // console.log(user);
+    // console.log("Redux Implememtation",user);
     return {
         type: 'save-user-data',
         user: user
     };
 }
 
+// export function saveCurrentIndex(index) {
+//     // console.log(user);
+//     // console.log("Redux Implememtation",user);
+//     return {
+//         type: 'save-current-index',
+//         index: index
+//     };
+// }
+
 export function savePopularVideosData(videos) {
-    console.log(videos);
-    console.log("Redux Implememtation for Popular videos");
+    // console.log(videos);
+    // console.log("Redux Implememtation for Popular videos");
     return {
         type: 'save-popular-videos-data',
         popularVideos: videos
@@ -91,8 +103,8 @@ export function savePopularVideosData(videos) {
 }
 
 export function saveLikedVideosData(videos) {
-    console.log(videos);
-    console.log("Redux Implememtation for liked videos");
+    // console.log(videos);
+    // console.log("Redux Implememtation for liked videos");
     return {
         type: 'save-liked-videos-data',
         likedVideos: videos
@@ -100,8 +112,8 @@ export function saveLikedVideosData(videos) {
 }
 
 export function saveNewVideosData(videos) {
-    console.log(videos);
-    console.log("Redux Implememtation for liked videos");
+    // console.log(videos);
+    // console.log("Redux Implememtation for liked videos");
     return {
         type: 'save-new-videos-data',
         newVideos: videos
@@ -110,7 +122,7 @@ export function saveNewVideosData(videos) {
 
 export function updateVideosData(userId, follow) {
     // console.log(videos);
-    console.log("Update Implememtation for Popular videos", userId, follow );
+    // console.log("Update Implememtation for Popular videos", userId, follow );
     return {
         type: 'update-videos-data',
         payload: {userId, follow}

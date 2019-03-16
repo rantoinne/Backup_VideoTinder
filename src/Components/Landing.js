@@ -9,14 +9,6 @@ import {
   View,TouchableOpacity,ImageBackground,AsyncStorage
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
-
 import { TabNavigator, StackNavigator } from 'react-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -42,9 +34,9 @@ class Landing extends Component {
       }
       else return null
     }).then((user) => {
-      console.log("tyuiop",user)
+      // console.log("tyuiop",user)
       if(user){
-         console.log("land if",user);
+         // console.log("land if",user);
         try {
           let response = fetch('http://ec2-34-227-16-178.compute-1.amazonaws.com:3000/userInfo', {
                       method: 'POST',
@@ -56,7 +48,7 @@ class Landing extends Component {
                           userId: JSON.parse(user[1])._id,
                       })
                     }).then(response => {
-                      console.log("loginnnnn", JSON.parse(response._bodyText));
+                      // console.log("loginnnnn", JSON.parse(response._bodyText));
                       this.props.saveUserData(JSON.parse(response._bodyText)[0]);
                       //On success we will store the access_token in the AsyncStorage
                       AsyncStorage.setItem('user', JSON.stringify(JSON.parse(response._bodyText)[0]));
@@ -66,11 +58,10 @@ class Landing extends Component {
             console.log("error " + error);
         }
     }
-      else
-        console.log("land else",user);
+        // console.log("land else",user);
         //this.props.saveUserData({});
     }).catch(err => {
-      console.log("in error", err)
+      // console.log("in error", err)
     })
   }
 
